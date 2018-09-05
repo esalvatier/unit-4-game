@@ -96,10 +96,15 @@ $(document).ready(function () {
 
     playerChar: {},
 
-    writeStats: function(oneChar) {
-      var valuesString = "<p>Name: " + oneChar.name + "</p>" +
+    writeStats: function(oneChar, isPlayer) {
+      var valuesString
+      if(isPlayer) {
+        valuesString = "<p>Name: " + oneChar.name + "</p>" +
         "<p>Health: " + oneChar.health + "</p>" +
         "<p>Attack: " + oneChar.attackVal + "</p>";
+      } else {
+        valuesString = "<p>Health: " + oneChar.health + "</p>";
+      }
       return valuesString;
     },
 
@@ -110,12 +115,12 @@ $(document).ready(function () {
         container.addClass("img-container col-md-3 border rounded");
         var characters = $("<img>");
         characters.addClass(areaName + " center-block border rounded");
-        characters.attr({"id": index,"src": charList[index].imgSRC, "height": size, "width": "auto"});
+        characters.attr({"name": charList[index].name ,"index": index,"src": charList[index].imgSRC, "height": size, "width": "auto"});
         container.append(characters);
+        var text = $("<div>");
         if (playerSelection) {
-          var text = $("<div>");
           text.addClass( charList[index].name + " character-stats text-center border rounded");
-          characters.after(text.html(clickingGame.writeStats(charList[index])));
+          characters.after(text.html(clickingGame.writeStats(charList[index], playerSelection)));
         }
         resultCont.prepend(container);
       });
@@ -144,7 +149,7 @@ $(document).ready(function () {
       $("body").css("background-image", 'url("' + enc.currEnviro.imgSRC + '")');
       enc.currEnemies = clickingGame.getEnemies();
       var opCont = clickingGame.drawChars(enc.currEnemies, "current-enemies", "125px", false, "enemies-row");
-      $(".encounter").prepend(opCont);
+      $(".encounter").after(opCont);
       $(".nextEnviro").prop("disabled", true);
       return enc
     },
@@ -185,7 +190,8 @@ $(document).ready(function () {
 
   var encounter = {
     currEnviro: undefined,
-    currEnemies: []
+    currEnemies: [],
+    selected: false
   };
 
   var charSelect = clickingGame.drawChars(clickingGame.availableChars, "available-Chars", "250px", true, "select-row");
@@ -197,38 +203,53 @@ $(document).ready(function () {
     $(this).removeClass("col-md-3").addClass("col-md-4").appendTo(".player");
     $(".discard").hide();
     $(".selection").hide();
-    clickingGame.selectChar(clickingGame.availableChars[$(this).find("img").attr("id")]);
+    clickingGame.selectChar(clickingGame.availableChars[$(this).find("img").attr("index")]);
     var btnCont = $("<div>").addClass("row");
     var btn = $("<button>Continue</button>");
     btn.addClass("nextEnviro center-block");
     btnCont.append(btn);
-    btnCont.appendTo(".encounter");
+    btnCont.appendTo(".environment");
     clickingGame.drawEnviro(encounter);
   });
 
-  $(".encounter").on("click",".nextEnviro" , function() {
+  $(".environment").on("click",".nextEnviro" , function() {
     clickingGame.drawEnviro(encounter);
   });
 
-  $(".encounter").on("click", ".current-enemies", function(){
+  $(".environment").on("click", ".current-enemies", function(){
+    if (!encounter.selected) {
+      $(".encounter").html("<h1>Current Target</h1>")
+      $(".encounter").html(clickingGame.drawChars([encounter.currEnemies[$(this).attr("index")]], "selected-enemy", "125px", false, "enemy-row"));
+      var text = $("<div>");
+      text.addClass("character-stats text-center border rounded");
+      $(".selected-enemy").after(text.html(clickingGame.writeStats(encounter.currEnemies[$(this).attr("index")], false)));
+      $(this).remove();
+      encounter.selected = true;
+      var atkBtn = $("<button>Attack</button>").addClass("atkButton center-block").attr("index", $(this).attr("index"));
+      $(".enemy-row").after(atkBtn);
+    }
+  });
+  
+  $(".encounter").on("click", ".atkButton", function(){
     var numDead = 0;
     for (var i = 0; i <encounter.currEnemies.length; i++) {
       if (encounter.currEnemies[i].dead === true) {
         numDead++;
       }
     }
-    clickingGame.fight(clickingGame.playerChar, encounter.currEnemies[$(this).attr("id")])
-    if (encounter.currEnemies[$(this).attr("id")].health <= 0) {
-      encounter.currEnemies[$(this).attr("id")].dead = true;
-      $(this).remove();
+    clickingGame.fight(clickingGame.playerChar, encounter.currEnemies[$(this).attr("index")])
+    if (encounter.currEnemies[$(this).attr("index")].health <= 0) {
+      encounter.currEnemies[$(this).attr("index")].dead = true;
+      $(".encounter").empty();
       numDead++
       if (numDead === encounter.currEnemies.length){
         $(".nextEnviro").prop("disabled", false);
       }
+      encounter.selected = false;
     }
     console.log(clickingGame.playerChar);
-    $(".character-stats").html(clickingGame.writeStats(clickingGame.playerChar));
+    $(".player .character-stats").html(clickingGame.writeStats(clickingGame.playerChar, true));
+    $(".encounter .character-stats").html(clickingGame.writeStats(encounter.currEnemies[$(this).attr("index")], false));
     clickingGame.doYouLose();
-
   });
 });
