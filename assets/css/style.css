@@ -13,10 +13,19 @@ body {
   background-size: cover;
 }
 
-.encounter .character-stats {
+.character-stats {
   background-image: url("../images/seamless_paper_texture/seamless_paper_texture.png");
   background-size: cover;
 }
+
 .encounter {
-  height: 400px;
+  height: 450px;
+}
+
+.enemies-row {
+  height: 200px;
+}
+
+h1 {
+  text-align: center;
 }
