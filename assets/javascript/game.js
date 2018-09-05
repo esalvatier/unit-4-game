@@ -203,7 +203,7 @@ $(document).ready(function () {
         $(".gameSpace").empty();
         var end = $("<h1>").addClass("col-md-12").text("Congrtulations! You win!");
         end.css("color", "green");
-        $("body").css("background-image", "url(assets/images/cemetery-2650712_1920.jpg)");
+        $("body").css("background-image", "url(assets/images/success-846055_1920.jpg)");
         $(".gameSpace").append(end);
       }
     }
