@@ -18,7 +18,7 @@ $(document).ready(function () {
 
       {
         name: "Rudd",
-        health: 13,
+        health: 15,
         attackVal: 4,
         baseAtk: 4,
         imgSRC: "assets/images/Firbolg.png"
