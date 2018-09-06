@@ -144,9 +144,7 @@ $(document).ready(function () {
         var index = Math.floor(Math.random() * this.enemies.length);
         result.push($.extend({}, this.enemies[index]));
         result[i].cntrAtkVal = Math.floor(Math.random() * this.enemies[index].cntrAtkMax);
-        if (enc.encountersPassed > 0) {
-          result[i].health *= enc.encountersPassed + 1; 
-        }
+        result[i].health *= enc.encountersPassed + 1; 
       }
       return result;
     },
@@ -159,7 +157,6 @@ $(document).ready(function () {
       enc.currEnemies = clickingGame.getEnemies(enc);
       var opCont = clickingGame.drawChars(enc.currEnemies, "current-enemies", "125px", false, "enemies-row").addClass("col-md-12");
       $(".encounter").after(opCont);
-      $(".nextEnviro").prop("disabled", true);
       return enc
     },
 
@@ -186,8 +183,11 @@ $(document).ready(function () {
 
     //decrements the health values for both an attacker object and a target object
     fight: function(attacker, target) {
-      target.health -=attacker.attackVal;
-      attacker.health -= target.cntrAtkVal;
+      debugger;
+      if (attacker.attackVal <= (target.health * 2)){
+        attacker.health -= target.cntrAtkVal;
+      }
+      target.health -=attacker.attackVal
       attacker.attackVal += attacker.baseAtk;
     },
 
@@ -231,18 +231,13 @@ $(document).ready(function () {
     $(".discard").hide();
     $(".selection").hide();
     clickingGame.selectChar(clickingGame.availableChars[$(this).find("img").attr("index")]);
-    //adds a button to continue the journey
-    var btnCont = $("<div>").addClass("row");
-    var btn = $("<button>Continue</button>");
-    btn.addClass("nextEnviro center-block");
-    btnCont.append(btn);
-    btnCont.appendTo(".environment");
     clickingGame.drawEnviro(encounter);
   });
 
   //gets the next environment
   $(".environment").on("click",".nextEnviro" , function() {
     $(".enemies-row").remove();
+    $(this).remove();
     encounter.encountersPassed++;
     clickingGame.drawEnviro(encounter);
     clickingGame.winOrLose(encounter);
@@ -280,7 +275,12 @@ $(document).ready(function () {
       numDead++
       //re-enables the environment button if all the enemies are dead
       if (numDead === encounter.currEnemies.length){
-        $(".nextEnviro").prop("disabled", false);
+        //adds a button to continue the journey
+        var btnCont = $("<div>").addClass("row");
+        var btn = $("<button>Next Environment</button>");
+        btn.addClass("nextEnviro center-block");
+        btnCont.append(btn);
+        btnCont.appendTo(".environment");
       }
       //reallows a new enemy to be selected to fight
       encounter.selected = false;
