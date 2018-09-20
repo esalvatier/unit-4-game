@@ -183,7 +183,6 @@ $(document).ready(function () {
 
     //decrements the health values for both an attacker object and a target object
     fight: function(attacker, target) {
-      debugger;
       if (attacker.attackVal <= (target.health * 2)){
         attacker.health -= target.cntrAtkVal;
       }
